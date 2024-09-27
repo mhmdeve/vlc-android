@@ -81,6 +81,8 @@ webserver-vulnerabilities:
         - npx audit-ci@^6 --skip-dev --config ./audit-ci.jsonc
 
 .build-all-base:
+    before_script:
+        - set -x
     stage: build
     script:
         - mkdir -p ~/.android
