@@ -296,6 +296,8 @@ if [ ! -d "$VLC_LIBJNI_PATH" ] || [ ! -d "$VLC_LIBJNI_PATH/.git" ]; then
     cd ..
 fi
 
+echo "STEP 1: LIBVLCJNI_SRC_DIR=${LIBVLCJNI_SRC_DIR}"
+
 # If you want to use an existing vlc dir add its path to an VLC_SRC_DIR env var
 if [ -z "$VLC_SRC_DIR" ]; then
     get_vlc_args=
@@ -308,6 +310,8 @@ if [ -z "$VLC_SRC_DIR" ]; then
 
     (cd ${VLC_LIBJNI_PATH} && ./buildsystem/get-vlc.sh ${get_vlc_args})
 fi
+
+echo "STEP 2: LIBVLCJNI_SRC_DIR=${LIBVLCJNI_SRC_DIR}"
 
 # Always clone VLC when using --init since we'll need to package some files
 # during the final assembly (lua/hrtfs/..)
@@ -326,15 +330,20 @@ mkdir -p $OUT_DBG_DIR
 
 if [ "$BUILD_MEDIALIB" != 1 -o ! -d "${VLC_LIBJNI_PATH}/libvlc/jni/libs/" ]; then
     AVLC_SOURCED=1 . ${VLC_LIBJNI_PATH}/buildsystem/compile-libvlc.sh
+echo "STEP 3: LIBVLCJNI_SRC_DIR=${LIBVLCJNI_SRC_DIR}"
     avlc_build
+echo "STEP 4: LIBVLCJNI_SRC_DIR=${LIBVLCJNI_SRC_DIR}"
 
     cp -a ${VLC_LIBJNI_PATH}/libvlc/jni/obj/local/${ANDROID_ABI}/*.so ${OUT_DBG_DIR}
 fi
+
 
 if [ "$NO_ML" != 1 ]; then
     ANDROID_ABI=$ANDROID_ABI RELEASE=$RELEASE RESET=$RESET buildsystem/compile-medialibrary.sh
     cp -a medialibrary/jni/obj/local/${ANDROID_ABI}/*.so ${OUT_DBG_DIR}
 fi
+
+echo "STEP 4: LIBVLCJNI_SRC_DIR=${LIBVLCJNI_SRC_DIR}"
 
 GRADLE_VLC_SRC_DIRS="$VLC_OUT_PATH/libs"
 
