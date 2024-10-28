@@ -281,7 +281,7 @@ fi
 
 
 if [ "$FORCE_VLC_4" = 1 ]; then
-    LIBVLCJNI_TESTED_HASH=98f1d1146171ed2e43fc68f0c57f35d077d3641b
+    LIBVLCJNI_TESTED_HASH=5dffe91aaf9f9149618e40bb93de363bb9cb3b1b
     LIBVLCJNI_REPOSITORY=https://code.videolan.org/robux4/libvlcjni.git
 else
     LIBVLCJNI_TESTED_HASH=fef5039810febe5a76d7766c2e748b25736a5106
@@ -293,7 +293,7 @@ fi
 if [ ! -d "$VLC_LIBJNI_PATH" ] || [ ! -d "$VLC_LIBJNI_PATH/.git" ]; then
     diagnostic "libvlcjni sources: not found, cloning"
     if [ "$FORCE_VLC_4" = 1 ]; then
-        branch="split-libvlc-jni"
+        branch="vlc-libvlc"
     else
         branch="libvlcjni-3.x"
     fi
