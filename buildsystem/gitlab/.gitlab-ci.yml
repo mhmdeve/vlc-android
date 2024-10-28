@@ -7,11 +7,13 @@ cache:
 
 variables:
   VLC_ANDROID_IMAGE_30: registry.videolan.org/vlc-debian-android-3.0:20230621085943
-  VLC_ANDROID_IMAGE_40: registry.videolan.org/vlc-debian-android:20230614051113
+  VLC_ANDROID_IMAGE_40: registry.videolan.org/vlc-debian-android:20240731083648
   VLC_WEB_BUILD_IMAGE: registry.videolan.org/videolan-alpine-node:20230523124511
   WEBSERVER_DIR: "./remoteaccess"
 
 default:
+  before_script: |
+    set -x
   interruptible: true
   image:
     name: $VLC_ANDROID_IMAGE_40
@@ -79,6 +81,8 @@ webserver-vulnerabilities:
         - npx audit-ci@^6 --skip-dev --config ./audit-ci.jsonc
 
 .build-all-base:
+    before_script:
+        - set -x
     stage: build
     script:
         - mkdir -p ~/.android
@@ -140,7 +144,7 @@ continuous-app-build:
 continuous-app-build-v4:
   extends: .build-all-base
   script:
-    - ./buildsystem/compile.sh --init
+    - ./buildsystem/compile.sh -vlc4
     - ./gradlew assembleDebug -PforceVlc4=true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
