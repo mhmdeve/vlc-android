@@ -646,7 +646,7 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
                 val currentProgressText = if (progressTimeText.isNullOrEmpty()) "0:00" else progressTimeText
 
                 val size = if (playlistModel.service?.playlistManager?.stopAfter != -1 ) (playlistModel.service?.playlistManager?.stopAfter ?: 0) + 1 else medias.size
-                val textTrack = getString(R.string.track_index, "${playlistModel.currentMediaPosition + 1} / $size")
+                val textTrack = getString(R.string.track_index, "${playlistModel.currentMediaPosition + 1} / $size".markBidi(true))
                 val textTrackDescription = getString(R.string.talkback_track_index, "${playlistModel.currentMediaPosition + 1}", "$size")
 
                 val textProgress = if (audioPlayProgressMode) {
@@ -654,7 +654,7 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
                     if ((lastEndsAt - endsAt).absoluteValue > 1) lastEndsAt = endsAt
                     getString(
                             R.string.audio_queue_progress_finished,
-                            getTimeInstance(java.text.DateFormat.MEDIUM).format(lastEndsAt)
+                            getTimeInstance(java.text.DateFormat.MEDIUM).format(lastEndsAt).markBidi(true)
                     )
                 } else
                     if (showRemainingTime && totalTime > 0) getString(
@@ -663,14 +663,14 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
                     )
                     else getString(
                             R.string.audio_queue_progress,
-                            if (totalTimeText.isNullOrEmpty()) currentProgressText else "$currentProgressText / $totalTimeText"
+                            if (totalTimeText.isNullOrEmpty()) currentProgressText else "$currentProgressText / $totalTimeText".markBidi(true)
                     )
                 val textDescription = if (audioPlayProgressMode) {
                     val endsAt = System.currentTimeMillis() + totalTime - progressTime
                     if ((lastEndsAt - endsAt).absoluteValue > 1) lastEndsAt = endsAt
                     getString(
                             R.string.audio_queue_progress_finished,
-                            getTimeInstance(java.text.DateFormat.MEDIUM).format(lastEndsAt)
+                            getTimeInstance(java.text.DateFormat.MEDIUM).format(lastEndsAt).markBidi(true)
                     )
                 } else
                     if (showRemainingTime && totalTime > 0) getString(
