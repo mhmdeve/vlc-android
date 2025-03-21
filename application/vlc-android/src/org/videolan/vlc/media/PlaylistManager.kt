@@ -57,6 +57,7 @@ import org.videolan.tools.DAV1D_THREAD_NUMBER
 import org.videolan.tools.HTTP_USER_AGENT
 import org.videolan.tools.KEY_AUDIO_CONFIRM_RESUME
 import org.videolan.tools.KEY_AUDIO_FORCE_SHUFFLE
+import org.videolan.tools.KEY_AUDIO_PLAY_AND_PAUSE
 import org.videolan.tools.KEY_INCOGNITO
 import org.videolan.tools.KEY_INCOGNITO_PLAYBACK_SPEED_AUDIO_GLOBAL_VALUE
 import org.videolan.tools.KEY_INCOGNITO_PLAYBACK_SPEED_VIDEO_GLOBAL_VALUE
@@ -159,6 +160,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     private val mediaFactory = FactoryManager.getFactory(IMediaFactory.factoryId) as IMediaFactory
     lateinit var videoResumeStatus: ResumeStatus
     lateinit var audioResumeStatus: ResumeStatus
+    var pauseAtNextMedia = false
 
     fun hasCurrentMedia() = isValidPosition(currentIndex)
 
@@ -1180,6 +1182,10 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                         }
                     }
                     playingState.value = true
+                    if (pauseAtNextMedia) {
+                        pauseAtNextMedia = false
+                        pause()
+                    }
                 }
                 MediaPlayer.Event.EndReached -> {
                     clearABRepeat()
@@ -1203,6 +1209,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                             }
                         }
                         next()
+                        if (!player.isVideoPlaying() && settings.getBoolean(KEY_AUDIO_PLAY_AND_PAUSE, false) && hasNext()) {
+                            pauseAtNextMedia = true
+                        }
                     }
                 }
                 MediaPlayer.Event.EncounteredError -> {
