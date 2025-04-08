@@ -86,6 +86,8 @@ import org.videolan.tools.Settings
 import org.videolan.tools.copy
 import org.videolan.tools.dp
 import org.videolan.tools.formatRateString
+import org.videolan.tools.hasRtl
+import org.videolan.tools.markBidi
 import org.videolan.tools.putSingle
 import org.videolan.tools.setGone
 import org.videolan.tools.setVisible
@@ -681,7 +683,14 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
                             R.string.audio_queue_progress,
                             if (totalTimeText.isNullOrEmpty()) progressTimeDescription else getString(R.string.talkback_out_of, progressTimeDescription, totalTimeDescription)
                     )
-                Pair("$textTrack  ${TextUtils.SEPARATOR}  $textProgress", "$textTrackDescription. $textDescription")
+                val dirFixedTextTrack = if (!textTrack.hasRtl())
+                    textTrack.markBidi(true)
+                else textTrack
+                val dirFixedTextProgress = if (!textProgress.hasRtl())
+                    textProgress.markBidi(true)
+                else textProgress
+
+                Pair("$dirFixedTextTrack  ${TextUtils.SEPARATOR}  $dirFixedTextProgress", "$textTrackDescription. $textDescription")
             }
             binding.audioPlayProgress.text = text.first
             binding.audioPlayProgress.contentDescription = text.second

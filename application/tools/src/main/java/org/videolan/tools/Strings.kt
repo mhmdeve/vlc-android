@@ -48,7 +48,7 @@ package org.videolan.tools
 
 import android.annotation.SuppressLint
 import java.text.DecimalFormat
-import java.util.*
+import java.util.Locale
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -141,4 +141,26 @@ fun String.markBidi(markLtr: Boolean = false): String {
         }
     }
     return this
+}
+
+/**
+ * Has the string any RTL char
+ *
+ * @return true if the string has any RTL char
+ */
+fun String.hasRtl(): Boolean {
+    toCharArray().forEach {
+        val directionality = Character.getDirectionality(it)
+        if (directionality in arrayOf(
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_ISOLATE
+            )
+        ) {
+            return true
+        }
+    }
+    return false
 }
