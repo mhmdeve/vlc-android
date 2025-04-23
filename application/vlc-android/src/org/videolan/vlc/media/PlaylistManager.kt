@@ -119,6 +119,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         var skipMediaUpdateRefresh = false
         private val mediaList = MediaWrapperList()
         fun hasMedia() = mediaList.size() != 0
+        fun hasMedia(uri:Uri) = mediaList.copy.any { it.uri == uri }
         val repeating = MutableStateFlow(PlaybackStateCompat.REPEAT_MODE_NONE)
         var playingAsAudio = false
     }
