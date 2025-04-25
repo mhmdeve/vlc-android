@@ -48,7 +48,7 @@ package org.videolan.tools
 
 import android.annotation.SuppressLint
 import java.text.DecimalFormat
-import java.util.*
+import java.util.Locale
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -120,11 +120,15 @@ fun Long.readableNumber(): String {
 
 fun Int.forbiddenChars() = FORBIDDEN_CHARS.substrlng(this)
 
-fun String.markBidi(): String {
+fun String.markBidi(markLtr: Boolean = false): String {
+    //left-to-right isolate
+    val lri = "\u2066"
     //right-to-left isolate
     val rli = "\u2067"
     //pop directional isolate
     val pdi = "\u2069"
+    //always wraps the value
+    if (markLtr) return lri + this + pdi
     for (ch in this) {
         when (Character.getDirectionality(ch)) {
             Character.DIRECTIONALITY_RIGHT_TO_LEFT,
@@ -137,4 +141,26 @@ fun String.markBidi(): String {
         }
     }
     return this
+}
+
+/**
+ * Has the string any RTL char
+ *
+ * @return true if the string has any RTL char
+ */
+fun String.hasRtl(): Boolean {
+    toCharArray().forEach {
+        val directionality = Character.getDirectionality(it)
+        if (directionality in arrayOf(
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE,
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT_ISOLATE
+            )
+        ) {
+            return true
+        }
+    }
+    return false
 }
