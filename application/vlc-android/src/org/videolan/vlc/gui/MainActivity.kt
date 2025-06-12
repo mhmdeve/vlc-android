@@ -74,6 +74,7 @@ import org.videolan.vlc.gui.helpers.Navigator
 import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.UiTools.isTablet
 import org.videolan.vlc.gui.video.VideoGridFragment
+import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.interfaces.Filterable
 import org.videolan.vlc.interfaces.IRefreshable
 import org.videolan.vlc.media.MediaUtils
@@ -125,6 +126,8 @@ class MainActivity : ContentActivity(),
             }
         }
 
+        checkStartPlaylistShortcut(intent)
+
         lifecycleScope.launch {
             if (!BuildConfig.DEBUG) return@launch
             AutoUpdate.clean(this@MainActivity.application)
@@ -174,6 +177,16 @@ class MainActivity : ContentActivity(),
 
     }
 
+    // Check if the app was opened from a playlist shortcut with a video as the first item.
+    private fun checkStartPlaylistShortcut(intent: Intent?) {
+        if (intent != null && intent.action != null && intent.action!!.startsWith("vlc.mediashortcut:")) {
+            intent.action = null
+            val startIntent = Intent(this, VideoPlayerActivity::class.java)
+            startIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            startActivity(startIntent)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         //Only the partial permission is granted for Android 11+
@@ -185,6 +198,13 @@ class MainActivity : ContentActivity(),
         }
         updateIncognitoModeIcon()
         configurationChanged(getScreenWidth())
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        // If the app is not in the destroyed state, the intent will not go through
+        // MainActivity onCreate, so onNewIntent is also needed
+        checkStartPlaylistShortcut(intent)
     }
 
     override fun onRequestPermissionsResult(
