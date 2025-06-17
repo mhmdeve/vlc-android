@@ -1,4 +1,8 @@
-include ':libvlcjni:libvlc', ':medialibrary'
+def useLocalMediaLibrary = settings.hasProperty('localMediaLib') ? settings.getProperty('localMediaLib') : true
+
+include ':libvlcjni:libvlc'
+if (useLocalMediaLibrary)
+    include ':medialibrary'
 include ':application:tools', ':application:resources', ':application:mediadb', ':application:app', ':application:live-plot-graph', ':application:television', ':application:donations', ':application:remote-access-server'
 include ':application:vlc-android'
 include ':application:moviepedia'
