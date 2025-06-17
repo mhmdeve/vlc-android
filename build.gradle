@@ -48,6 +48,7 @@ ext {
     versionName = vlcMajorVersion == 3 ? '3.6.5-1' : '4.0.0-preview - ' + versionCode 
     libvlcVersion = vlcMajorVersion == 3 ? '3.6.2' :'4.0.0-eap20'
     useLocalMediaLibrary = project.hasProperty('localMediaLib') ? project.getProperty('localMediaLib') : true
+    useLocalLibvlcJNI = (project.hasProperty('localLibvlcJNI') ? project.getProperty('localLibvlcJNI') : true) && file('libvlcjni').isDirectory()
     medialibraryVersion = '0.13.13' + (vlcMajorVersion == 3 ? '' : '-vlc4') + '-rc17'
     minSdkVersion = vlcMajorVersion == 3 ? 17 : 21
     remoteAccessVersion = '0.6.0'

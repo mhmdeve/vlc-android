@@ -1,6 +1,8 @@
 def useLocalMediaLibrary = settings.hasProperty('localMediaLib') ? settings.getProperty('localMediaLib') : true
+def useLocalLibvlcJNI = (settings.hasProperty('localLibvlcJNI') ? settings.getProperty('localLibvlcJNI') : true) && file('libvlcjni').isDirectory()
 
-include ':libvlcjni:libvlc'
+if (useLocalLibvlcJNI)
+    include ':libvlcjni:libvlc'
 if (useLocalMediaLibrary)
     include ':medialibrary'
 include ':application:tools', ':application:resources', ':application:mediadb', ':application:app', ':application:live-plot-graph', ':application:television', ':application:donations', ':application:remote-access-server'
