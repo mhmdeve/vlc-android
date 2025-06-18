@@ -59,7 +59,6 @@ if [ ! -d "${MEDIALIBRARY_MODULE_DIR}/${SQLITE_RELEASE}" ]; then
   fi
   tar -xozf ${SQLITE_RELEASE}.tar.gz
   rm -f ${SQLITE_RELEASE}.tar.gz
-  cd ${SQLITE_RELEASE}
 fi
 cd ${MEDIALIBRARY_MODULE_DIR}/${SQLITE_RELEASE}
 if [ ! -d "build-$ANDROID_ABI" ]; then
@@ -71,7 +70,6 @@ if [ ! -e ./config.status -o "$RELEASE" = "1" ]; then
   ../configure \
     --host=$TARGET_TUPLE \
     --prefix=${SRC_DIR}/medialibrary/prefix/${TARGET_TUPLE} \
-    --disable-shell \
     --disable-shared \
     CFLAGS="${VLC_CFLAGS}" \
     CXXFLAGS="${VLC_CFLAGS} ${VLC_CXXFLAGS}" \
