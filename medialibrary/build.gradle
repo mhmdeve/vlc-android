@@ -44,16 +44,20 @@ android {
                     abiFilters.addAll(rootProject.ext.abisSelected)
                 else {
                     // dev mode: automagically build mla for the architectures that have a libmedialibrary.a
+                    def ndkVersionMajor = android.ndkVersion.split("\\.")[0]
                     def abis = []
                     ['x86_64', 'x86', 'armeabi-v7a', 'arm64-v8a'].each { abi_test ->
-                        if (file('prefix/android-' + rootProject.ext.minSdkVersion + '-' + abi_test + '/lib/libmedialibrary.a').exists())
+                        if (file('prefix/ndk' + ndkVersionMajor + '-android-' + rootProject.ext.minSdkVersion + '-' + abi_test + '/lib/libmedialibrary.a').exists())
                             abis.addAll(abi_test)
                     }
                     if (abis == [])
-                        println 'No libmedialibrary.a found for any ABI for minSdkVersion = ' + rootProject.ext.minSdkVersion
+                        println 'No libmedialibrary.a found for any ABI for ndkVersionMajor=' + ndkVersionMajor + ' / minSdkVersion = ' + rootProject.ext.minSdkVersion
                     else
                         abiFilters = abis
                 }
+            }
+            cmake {
+                arguments "-DNDK_VER_MAJ:STRING=" + android.ndkVersion.split("\\.")[0]
             }
         }
     }

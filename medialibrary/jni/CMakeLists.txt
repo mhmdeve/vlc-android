@@ -8,8 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(ANDROID_STL c++_shared)
 set(ANDROID_CPP_FEATURES "rtti exceptions")
 
+set(NDK_VER_MAJ "27" CACHE STRING "NDK Major version used to compile the prebuilt native libraries")
+
 set(LIBVLCJNI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../libvlcjni" CACHE PATH "libvlcjni base directory")
-set(PREBUILT_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/../prefix/android-${ANDROID_PLATFORM}-${ANDROID_ABI}")
+set(PREBUILT_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/../prefix/ndk${NDK_VER_MAJ}-${ANDROID_PLATFORM}-${ANDROID_ABI}")
 set(LIBRAY_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_NDK_ABI_NAME}")
 
 # prebuilt binaries
