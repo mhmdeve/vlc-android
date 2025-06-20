@@ -50,6 +50,7 @@ ext {
     libvlcVersion = vlcMajorVersion == 3 ? '3.6.2' :'4.0.0-eap20'
     medialibraryVersion = vlcMajorVersion == 3 ? '0.13.13-rc17' : '0.13.13-vlc4-rc17'
     minSdkVersion = vlcMajorVersion == 3 ? 17 : 21
+    abisSelected = project.findProperty('abisSelected') ? project.getProperty('abisSelected').split(',').collect{it as String} : project.findProperty('vlcLibVariant')
     targetSdkVersion = 34
     compileSdkVersion = 34
     desugarLib = '2.0.4'

@@ -205,13 +205,3 @@ meson compile -C "build-android-$ANDROID_ABI"
 meson install -C "build-android-$ANDROID_ABI"
 
 avlc_checkfail "medialibrary: build failed"
-
-cd ${SRC_DIR}
-
-cmake -S medialibrary/jni -B medialibrary/medialibrary/mla/android-${ANDROID_API}-${ANDROID_ABI} \
-    -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
-    -DANDROID_ABI=${ANDROID_ABI} -DANDROID_PLATFORM=${ANDROID_API} -DCMAKE_BUILD_TYPE=${CMAKE_DEBUG} \
-    -DLIBVLCJNI_SRC_DIR:PATH=${LIBVLCJNI_SRC_DIR}
-cmake --build medialibrary/medialibrary/mla/android-${ANDROID_API}-${ANDROID_ABI}
-
-avlc_checkfail "nkd-build medialibrary failed"

@@ -353,7 +353,8 @@ fi
 
 if [ "$NO_ML" != 1 ]; then
     ANDROID_ABI=$ANDROID_ABI RELEASE=$RELEASE RESET=$RESET buildsystem/compile-medialibrary.sh
-    cp -a medialibrary/jni/obj/local/${ANDROID_ABI}/*.so ${OUT_DBG_DIR}
+    # TODO copy after the gradle build
+    # cp -a medialibrary/jni/obj/local/${ANDROID_ABI}/*.so ${OUT_DBG_DIR}
 fi
 
 ##################
