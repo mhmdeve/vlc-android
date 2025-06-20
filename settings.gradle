@@ -33,7 +33,7 @@ if (abisSelected == null) {
         abisSelected = abis
 }
 
-// build the medialibrary code or use a published AAR (default: build locally)
+// build the medialibrary JAVA and JNI code or use a published AAR (default: build locally)
 def useLocalMediaLibrary = (abisSelected != null) && (settings.hasProperty('localMediaLib') ? settings.getProperty('localMediaLib') : true)
 
 include ':libvlcjni:libvlc'

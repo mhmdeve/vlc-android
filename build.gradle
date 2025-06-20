@@ -47,11 +47,27 @@ ext {
     vlcMajorVersion = project.hasProperty('forceVlc4') && project.getProperty('forceVlc4') ? 4 : 3
     versionName = vlcMajorVersion == 3 ? '3.6.5-1' : '4.0.0-preview - ' + versionCode 
     libvlcVersion = vlcMajorVersion == 3 ? '3.6.2' :'4.0.0-eap20'
-    useLocalMediaLibrary = project.hasProperty('localMediaLib') ? project.getProperty('localMediaLib') : true
-    medialibraryVersion = '0.13.13' + (vlcMajorVersion == 3 ? '' : '-vlc4') + '-rc17'
     minSdkVersion = vlcMajorVersion == 3 ? 17 : 21
     buildToolsVersion = vlcMajorVersion == 3 ? '35.0.0' : '35.0.0'
     remoteAccessVersion = '0.6.0'
+
+    abisSelected = project.findProperty('selectABI') ? project.getProperty('selectABI').split(',').collect{it as String} : project.findProperty('vlcLibABI')
+    if (abisSelected == null) {
+        // automagically select the ABI's where the prebuilt libraries are available
+        def abis = []
+        ['x86_64', 'x86', 'armeabi-v7a', 'arm64-v8a'].each { abi_test ->
+            if (file('libvlcjni/libvlc/jni/libs/' + abi_test + '/libvlc.so').exists() && 
+                file('medialibrary/prefix/android-' + minSdkVersion + '-' + abi_test + '/lib/libmedialibrary.a').exists())
+                abis.addAll(abi_test)
+        }
+        if (abis == [])
+            println 'No libvlc.so+libmedialibrary.a found for any ABI for minSdkVersion = ' + minSdkVersion
+        else
+            abisSelected = abis
+    }
+    useLocalMediaLibrary = (abisSelected != null) && (project.hasProperty('localMediaLib') ? project.getProperty('localMediaLib') : true)
+    medialibraryVersion = '0.13.13' + (vlcMajorVersion == 3 ? '' : '-vlc4') + '-rc17'
+
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
     // default ndkVersion in  android_plugin_version in 8.9.1: 27.0.12077973

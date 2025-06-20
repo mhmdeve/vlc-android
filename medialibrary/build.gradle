@@ -38,6 +38,12 @@ android {
         ndkVersion = rootProject.ext.toolchainNdkVersion
         if (rootProject.ext.tooclchainNdkPath != null)
             ndkPath = rootProject.ext.tooclchainNdkPath
+        externalNativeBuild {
+            ndk {
+                if (rootProject.ext.abisSelected != null)
+                    abiFilters.addAll(rootProject.ext.abisSelected)
+            }
+        }
     }
 
     sourceSets {
@@ -77,6 +83,12 @@ android {
     buildFeatures {
         renderScript true
         aidl true
+    }
+    externalNativeBuild {
+        cmake {
+            if (rootProject.ext.abisSelected != null)
+                path file('jni/CMakeLists.txt')
+        }
     }
 
     // Make per-variant version code
