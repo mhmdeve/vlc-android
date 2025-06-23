@@ -189,6 +189,8 @@ init_local_props() {
     echo_props() {
         echo "sdk.dir=$ANDROID_SDK"
         echo "android.ndkPath=$ANDROID_NDK"
+        NDK_FULL_VERSION=$(grep -o '^Pkg.Revision.*[0-9]*.*' $ANDROID_NDK/source.properties |cut -d " " -f 3)
+        echo "android.ndkFullVersion=$NDK_FULL_VERSION"
     }
     # first check if the file just needs to be created for the first time
     if [ ! -f "$1" ]; then
@@ -227,7 +229,8 @@ init_local_props() {
         while IFS= read -r LINE || [ -n "$LINE" ]; do
             line_sdk_dir="${LINE#sdk.dir=}"
             line_ndk_dir="${LINE#android.ndkPath=}"
-            if [ "x$line_sdk_dir" = "x$LINE" ] && [ "x$line_ndk_dir" = "x$LINE" ]; then
+            line_ndk_version="${LINE#android.ndkFullVersion=}"
+            if [ "x$line_sdk_dir" = "x$LINE" ] && [ "x$line_ndk_dir" = "x$LINE" ] && [ "x$line_ndk_version" = "x$LINE" ]; then
                 echo "$LINE"
             fi
         done <"$1" >"$temp_props"
