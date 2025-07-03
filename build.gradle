@@ -68,6 +68,8 @@ ext {
     useLocalMediaLibrary = (abisSelected != null) && (project.hasProperty('localMediaLib') ? project.getProperty('localMediaLib') : true)
     medialibraryVersion = '0.13.13' + (vlcMajorVersion == 3 ? '' : '-vlc4') + '-rc17'
 
+    useLocalLibVlc = (abisSelected != null) && (project.hasProperty('localLibvlc') ? project.getProperty('localLibvlc') : true)
+
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
     // default ndkVersion in  android_plugin_version in 8.9.1: 27.0.12077973

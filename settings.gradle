@@ -35,8 +35,11 @@ if (abisSelected == null) {
 
 // build the medialibrary JAVA and JNI code or use a published AAR (default: build locally)
 def useLocalMediaLibrary = (abisSelected != null) && (settings.hasProperty('localMediaLib') ? settings.getProperty('localMediaLib') : true)
+// build libvlcjni JAVA and JNI code or use a published AAR (default: build locally)
+def useLocalLibVlc = (abisSelected != null) && (settings.hasProperty('localLibvlc') ? settings.getProperty('localLibvlc') : true)
 
-include ':libvlcjni:libvlc'
+if (useLocalLibVlc)
+    include ':libvlcjni:libvlc'
 if (useLocalMediaLibrary)
     include ':medialibrary'
 include ':application:tools', ':application:resources', ':application:mediadb', ':application:app', ':application:live-plot-graph', ':application:television', ':application:donations', ':application:remote-access-server'
