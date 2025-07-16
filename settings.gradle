@@ -1,4 +1,47 @@
-include ':libvlcjni:libvlc', ':medialibrary'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id("com.android.settings") version "8.9.1"
+}
+
+def vlcMajorVersion = hasProperty('forceVlc4') && getProperty('forceVlc4') ? 4 : 3
+
+android {
+    minSdk = vlcMajorVersion == 3 ? 17 : 21
+    targetSdk = 34
+    compileSdk = 34 // Dockers: 3.0=36 / 4.0=36
+    buildToolsVersion = '35.0.0'
+}
+
+def abisSelected = settings.hasProperty('selectABI') ? settings.getProperty('selectABI').split(',').collect{it as String} : (settings.hasProperty('vlcLibABI') ? settings.getProperty('vlcLibABI') : null)
+if (abisSelected == null) {
+    // automagically select the ABI's where the prebuilt libraries are available
+    def abis = []
+    ['x86_64', 'x86', 'armeabi-v7a', 'arm64-v8a'].each { abi_test ->
+        if (file('libvlcjni/libvlc/jni/libs/' + abi_test + '/libvlc.so').exists() && 
+            file('medialibrary/prefix/android-' + android.minSdk + '-' + abi_test + '/lib/libmedialibrary.a').exists())
+            abis.addAll(abi_test)
+    }
+    if (abis == [])
+        println 'No libvlc.so found for any ABI'
+    else
+        abisSelected = abis
+}
+
+// build the medialibrary JAVA and JNI code or use a published AAR (default: build locally)
+def useLocalMediaLibrary = (abisSelected != null) && (settings.hasProperty('localMediaLib') ? settings.getProperty('localMediaLib') : true)
+// build libvlcjni JAVA and JNI code or use a published AAR (default: build locally)
+def useLocalLibVlc = (abisSelected != null) && (settings.hasProperty('localLibvlc') ? settings.getProperty('localLibvlc') : true)
+
+if (useLocalLibVlc)
+    include ':libvlcjni:libvlc'
+if (useLocalMediaLibrary)
+    include ':medialibrary'
 include ':application:tools', ':application:resources', ':application:mediadb', ':application:app', ':application:live-plot-graph', ':application:television', ':application:donations', ':application:remote-access-server'
 include ':application:vlc-android'
 include ':application:moviepedia'

@@ -35,10 +35,15 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        compileSdk rootProject.ext.compileSdkVersion
-        buildToolsVersion rootProject.ext.buildToolsVersion
+        ndkVersion = rootProject.ext.toolchainNdkVersion
+        if (rootProject.ext.tooclchainNdkPath != null)
+            ndkPath = rootProject.ext.tooclchainNdkPath
+        externalNativeBuild {
+            ndk {
+                if (rootProject.ext.abisSelected != null)
+                    abiFilters.addAll(rootProject.ext.abisSelected)
+            }
+        }
     }
 
     sourceSets {
@@ -79,6 +84,12 @@ android {
         renderScript true
         aidl true
     }
+    externalNativeBuild {
+        cmake {
+            if (rootProject.ext.abisSelected != null)
+                path file('jni/CMakeLists.txt')
+        }
+    }
 
     // Make per-variant version code
     libraryVariants.all { variant ->
@@ -96,9 +107,11 @@ clean {
 }
 
 dependencies {
-    releaseImplementation project(':libvlcjni:libvlc')
-    debugImplementation "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
-    devImplementation project(':libvlcjni:libvlc')
+    if (rootProject.ext.useLocalLibVlc) {
+        api project(':libvlcjni:libvlc')
+    } else {
+        api "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
+    }
     api "androidx.legacy:legacy-support-v4:$rootProject.ext.androidxLegacyVersion"
     api "androidx.core:core:$rootProject.ext.androidxCoreVersion"
     api "androidx.fragment:fragment:$rootProject.ext.androidxFragmentVersion"
