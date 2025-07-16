@@ -40,11 +40,10 @@ android {
         // that the app's state is completely cleared between tests.
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        compileSdk rootProject.ext.compileSdkVersion
-        buildToolsVersion rootProject.ext.buildToolsVersion
         vectorDrawables.useSupportLibrary = true
+        ndkVersion = rootProject.ext.toolchainNdkVersion
+        if (rootProject.ext.tooclchainNdkPath != null)
+            ndkPath = rootProject.ext.tooclchainNdkPath
     }
 
     testOptions {
@@ -152,13 +151,14 @@ task generateSources(type: Jar) {
 
 dependencies {
     devApi project(':libvlcjni:libvlc')
-    devApi project(':medialibrary')
     debugApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
-    debugApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
+    if (rootProject.ext.useLocalMediaLibrary) {
+        api project(':medialibrary')
+    } else {
+        api "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
+    }
     releaseApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
-    releaseApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     signedReleaseApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
-    signedReleaseApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     api project(':application:tools')
     api project(':application:resources')
     api project(':application:mediadb')

@@ -76,3 +76,4 @@ libvlc.pc.backup
 libvlcpp.pc
 lib/
 /buildsystem/automation/certificates/
+medialibrary/.cxx
