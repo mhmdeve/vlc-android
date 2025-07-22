@@ -27,6 +27,13 @@
             android:summary="@string/force_shuffle_summary"
             android:title="@string/force_shuffle_title"/>
 
+    <CheckBoxPreference
+            app:singleLineTitle="false"
+            android:defaultValue="false"
+            android:key="audio_play_and_pause"
+            android:summary="@string/play_and_pause_summary"
+            android:title="@string/play_and_pause_title"/>
+
     </PreferenceCategory>
 
 
