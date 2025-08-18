@@ -192,9 +192,9 @@ else
 fi
 printf 'cpu = '"'"'%s'"'"'\n' "${MESON_CPU}" >&3
 
-if [ ! -d "build-android-$ANDROID_ABI/" ] || [ ! -f "build-android-$ANDROID_ABI/build.ninja" ]; then
-    export PATH="$LIBVLCJNI_SRC_DIR/vlc/extras/tools/build/bin:$PATH"
+export PATH="$LIBVLCJNI_SRC_DIR/vlc/extras/tools/build/bin:$PATH"
 
+if [ ! -d "build-android-$ANDROID_ABI/" ] || [ ! -f "build-android-$ANDROID_ABI/build.ninja" ]; then
     PKG_CONFIG_LIBDIR="$LIBVLCJNI_SRC_DIR/vlc/build-android-${TARGET_TUPLE}/install/lib/pkgconfig" \
     PKG_CONFIG_PATH="${MEDIALIBRARY_PREFIX}/lib/pkgconfig:$LIBVLCJNI_SRC_DIR/vlc/contrib/$TARGET_TUPLE/lib/pkgconfig/" \
     meson setup \
