@@ -11,8 +11,11 @@ import org.videolan.libvlc.util.VLCUtil;
 import org.videolan.medialibrary.interfaces.media.MediaWrapper;
 import org.videolan.medialibrary.media.MediaLibraryItem;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -154,5 +157,28 @@ public class Tools {
      */
     public static Boolean hasSubString(String source, String substring) {
         return Pattern.compile(Pattern.quote(substring), Pattern.CASE_INSENSITIVE).matcher(source).find();
+    }
+
+    public static <T> T[] cleanupArray(T[] source) {
+        ArrayList<T> list = new ArrayList<>();
+        for (T s : source)
+            if (s!= null)
+                list.add(s);
+        return toArray(list);
+
+    }
+
+    public static <T> T[] toArray(Collection<T> c, T[] a) {
+        return c.size()>a.length ?
+                c.toArray((T[])Array.newInstance(a.getClass().getComponentType(), c.size())) :
+                c.toArray(a);
+    }
+
+    public static <T> T[] toArray(Collection<T> c, Class klass) {
+        return toArray(c, (T[])Array.newInstance(klass, c.size()));
+    }
+
+    public static <T> T[] toArray(Collection<T> c) {
+        return toArray(c, c.iterator().next().getClass());
     }
 }
