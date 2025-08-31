@@ -88,16 +88,21 @@ class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private va
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = getItem(position) ?: return
+        val item = getItem(position)
+        if (item == null) {
+            // Handle null item (e.g., show placeholder)
+            holder.binding.setVariable(BR.media, null)
+            holder.binding.setVariable(BR.cover, UiTools.getDefaultVideoDrawable(holder.itemView.context))
+            return
+        }
+
         holder.binding.setVariable(BR.scaleType, ImageView.ScaleType.CENTER_CROP)
         fillView(holder, item)
         holder.binding.setVariable(BR.media, item)
         holder.selectView(multiSelectHelper.isSelected(position))
-        item.let {
-            holder.binding.setVariable(BR.isFavorite, it.isFavorite)
-            holder.binding.setVariable(BR.showProgress, item.artworkMrl.isNullOrBlank())
-            holder.binding.setVariable(BR.showItemProgress, !hideProgress)
-        }
+        holder.binding.setVariable(BR.isFavorite, item.isFavorite)
+        holder.binding.setVariable(BR.showProgress, item.artworkMrl.isNullOrBlank())
+        holder.binding.setVariable(BR.showItemProgress, !hideProgress)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
@@ -121,9 +126,13 @@ class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private va
         holder.binding.setVariable(BR.cover, UiTools.getDefaultVideoDrawable(holder.itemView.context))
     }
 
-    override fun getItem(position: Int) = if (isPositionValid(position)) super.getItem(position) else null
+    override fun getItem(position: Int): MediaLibraryItem? {
+        return if (position in 0 until itemCount) super.getItem(position) else null
+    }
 
-    private fun isPositionValid(position: Int) =  position in 0 until itemCount
+    private fun isPositionValid(position: Int): Boolean {
+        return position in 0 until itemCount && super.getItem(position) != null
+    }
 
     private fun fillView(holder: ViewHolder, item: MediaLibraryItem) {
         when (item) {
@@ -210,7 +219,9 @@ class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private va
 
         fun onImageClick(@Suppress("UNUSED_PARAMETER") v: View) {
             val position = layoutPosition
-            if (isPositionValid(position)) getItem(position)?.let { eventsChannel.trySend(VideoImageClick(layoutPosition, it)) }
+            if (isPositionValid(position)) {
+                getItem(position)?.let { eventsChannel.trySend(VideoImageClick(layoutPosition, it)) }
+            }
         }
 
         fun onClick(@Suppress("UNUSED_PARAMETER") v: View) {
@@ -239,47 +250,58 @@ class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private va
     }
 
     private object VideoItemDiffCallback : DiffUtil.ItemCallback<MediaLibraryItem>() {
-        override fun areItemsTheSame(oldItem: MediaLibraryItem, newItem: MediaLibraryItem) = when {
-            oldItem is MediaWrapper && newItem is MediaWrapper -> {
-                oldItem === newItem || oldItem.type == newItem.type && oldItem.equals(newItem)
+        override fun areItemsTheSame(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Boolean {
+            if (oldItem == null || newItem == null) return oldItem == newItem
+            return when {
+                oldItem is MediaWrapper && newItem is MediaWrapper ->
+                    oldItem === newItem || (oldItem.type == newItem.type && oldItem == newItem)
+                else ->
+                    oldItem === newItem || (oldItem.itemType == newItem.itemType && oldItem == newItem)
             }
-            else -> oldItem === newItem || oldItem.itemType == newItem.itemType && oldItem.equals(newItem)
         }
 
         @SuppressLint("DiffUtilEquals")
         override fun areContentsTheSame(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Boolean {
+            // Handle null cases first
+            if (oldItem == null || newItem == null) {
+                return oldItem == newItem // Both null → same, one null → different
+            }
+
             return if (oldItem is MediaWrapper && newItem is MediaWrapper) {
                 oldItem === newItem || (oldItem.displayTime == newItem.displayTime
                         && oldItem.artworkMrl == newItem.artworkMrl
                         && oldItem.seen == newItem.seen
                         && oldItem.isPresent == newItem.isPresent
                         && oldItem.isFavorite == newItem.isFavorite)
-            } //else if (oldItem is FolderImpl && newItem is FolderImpl) return oldItem === newItem || (oldItem.title == newItem.title && oldItem.artworkMrl == newItem.artworkMrl)
-            else if (oldItem is VideoGroup && newItem is VideoGroup) {
+            } else if (oldItem is VideoGroup && newItem is VideoGroup) {
                 oldItem === newItem || (oldItem.title == newItem.title
                         && oldItem.tracksCount == newItem.tracksCount && oldItem.presentCount != newItem.presentCount
                         && oldItem.isFavorite == newItem.isFavorite)
-            }
-            else if (oldItem is Folder && newItem is Folder) {
+            } else if (oldItem is Folder && newItem is Folder) {
                 oldItem === newItem || (oldItem.title == newItem.title
                         && oldItem.tracksCount == newItem.tracksCount
                         && oldItem.mMrl == newItem.mMrl
                         && oldItem.isFavorite == newItem.isFavorite)
-            }
-            else oldItem.itemType == MediaLibraryItem.TYPE_FOLDER || (oldItem.itemType == MediaLibraryItem.TYPE_VIDEO_GROUP
-                        && oldItem.isFavorite == newItem.isFavorite)
+            } else oldItem.itemType == MediaLibraryItem.TYPE_FOLDER || (oldItem.itemType == MediaLibraryItem.TYPE_VIDEO_GROUP
+                    && oldItem.isFavorite == newItem.isFavorite)
         }
 
-        override fun getChangePayload(oldItem: MediaLibraryItem, newItem: MediaLibraryItem) = when {
-            (oldItem is MediaWrapper && newItem is MediaWrapper) && oldItem.displayTime != newItem.displayTime -> UPDATE_TIME
-            (oldItem is VideoGroup && newItem is VideoGroup) -> UPDATE_VIDEO_GROUP
-            (oldItem is Folder && newItem is Folder) -> UPDATE_VIDEO_GROUP
-            oldItem.artworkMrl != newItem.artworkMrl -> UPDATE_THUMB
-            oldItem.isFavorite != newItem.isFavorite  -> UPDATE_FAVORITE_STATE
-            else -> UPDATE_SEEN
+        override fun getChangePayload(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Any? {
+            // Handle null cases first
+            if (oldItem == null || newItem == null) {
+                return null
+            }
+
+            return when {
+                (oldItem is MediaWrapper && newItem is MediaWrapper) && oldItem.displayTime != newItem.displayTime -> UPDATE_TIME
+                (oldItem is VideoGroup && newItem is VideoGroup) -> UPDATE_VIDEO_GROUP
+                (oldItem is Folder && newItem is Folder) -> UPDATE_VIDEO_GROUP
+                oldItem.artworkMrl != newItem.artworkMrl -> UPDATE_THUMB
+                oldItem.isFavorite != newItem.isFavorite -> UPDATE_FAVORITE_STATE
+                else -> UPDATE_SEEN
+            }
         }
     }
-
     fun setSeenMediaMarkerVisible(seenMediaMarkerVisible: Boolean) {
         isSeenMediaMarkerVisible = seenMediaMarkerVisible
     }
