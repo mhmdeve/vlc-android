@@ -18,9 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  */
 
+/*
+ * Modified by mhmdeveloper
+ * Date: 2026-02-21
+ * Changes:
+ * - Paging 2 null placeholder fix
+ */
+
 package org.videolan.vlc.gui.video
 
-import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.os.Build
 import android.util.Log
@@ -57,7 +63,7 @@ import org.videolan.vlc.viewmodels.mobile.VideoGroupingType
 private const val TAG = "VLC/VideoListAdapter"
 
 class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private var hideProgress:Boolean
-) : PagedListAdapter<MediaLibraryItem, VideoListAdapter.ViewHolder>(VideoItemDiffCallback), FastScroller.SeparatedAdapter,
+) : PagedListAdapter<MediaLibraryItem, VideoListAdapter.ViewHolder>(VideoItemDiffCallback()), FastScroller.SeparatedAdapter,
         MultiSelectAdapter<MediaLibraryItem>, IEventsSource<VideoAction> by EventsSource() {
 
     var isListMode = false
@@ -249,59 +255,6 @@ class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private va
         override fun isSelected() = multiSelectHelper.isSelected(layoutPosition)
     }
 
-    private object VideoItemDiffCallback : DiffUtil.ItemCallback<MediaLibraryItem>() {
-        override fun areItemsTheSame(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Boolean {
-            if (oldItem == null || newItem == null) return oldItem == newItem
-            return when {
-                oldItem is MediaWrapper && newItem is MediaWrapper ->
-                    oldItem === newItem || (oldItem.type == newItem.type && oldItem == newItem)
-                else ->
-                    oldItem === newItem || (oldItem.itemType == newItem.itemType && oldItem == newItem)
-            }
-        }
-
-        @SuppressLint("DiffUtilEquals")
-        override fun areContentsTheSame(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Boolean {
-            // Handle null cases first
-            if (oldItem == null || newItem == null) {
-                return oldItem == newItem // Both null → same, one null → different
-            }
-
-            return if (oldItem is MediaWrapper && newItem is MediaWrapper) {
-                oldItem === newItem || (oldItem.displayTime == newItem.displayTime
-                        && oldItem.artworkMrl == newItem.artworkMrl
-                        && oldItem.seen == newItem.seen
-                        && oldItem.isPresent == newItem.isPresent
-                        && oldItem.isFavorite == newItem.isFavorite)
-            } else if (oldItem is VideoGroup && newItem is VideoGroup) {
-                oldItem === newItem || (oldItem.title == newItem.title
-                        && oldItem.tracksCount == newItem.tracksCount && oldItem.presentCount != newItem.presentCount
-                        && oldItem.isFavorite == newItem.isFavorite)
-            } else if (oldItem is Folder && newItem is Folder) {
-                oldItem === newItem || (oldItem.title == newItem.title
-                        && oldItem.tracksCount == newItem.tracksCount
-                        && oldItem.mMrl == newItem.mMrl
-                        && oldItem.isFavorite == newItem.isFavorite)
-            } else oldItem.itemType == MediaLibraryItem.TYPE_FOLDER || (oldItem.itemType == MediaLibraryItem.TYPE_VIDEO_GROUP
-                    && oldItem.isFavorite == newItem.isFavorite)
-        }
-
-        override fun getChangePayload(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Any? {
-            // Handle null cases first
-            if (oldItem == null || newItem == null) {
-                return null
-            }
-
-            return when {
-                (oldItem is MediaWrapper && newItem is MediaWrapper) && oldItem.displayTime != newItem.displayTime -> UPDATE_TIME
-                (oldItem is VideoGroup && newItem is VideoGroup) -> UPDATE_VIDEO_GROUP
-                (oldItem is Folder && newItem is Folder) -> UPDATE_VIDEO_GROUP
-                oldItem.artworkMrl != newItem.artworkMrl -> UPDATE_THUMB
-                oldItem.isFavorite != newItem.isFavorite -> UPDATE_FAVORITE_STATE
-                else -> UPDATE_SEEN
-            }
-        }
-    }
     fun setSeenMediaMarkerVisible(seenMediaMarkerVisible: Boolean) {
         isSeenMediaMarkerVisible = seenMediaMarkerVisible
     }
