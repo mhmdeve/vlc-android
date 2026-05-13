@@ -18,15 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  */
 
-/*
- * Modified by mhmdeveloper
- * Date: 2026-02-21
- * Changes:
- * - Paging 2 null placeholder fix
- */
-
 package org.videolan.vlc.gui.video
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.os.Build
 import android.util.Log
@@ -62,8 +56,12 @@ import org.videolan.vlc.viewmodels.mobile.VideoGroupingType
 
 private const val TAG = "VLC/VideoListAdapter"
 
-class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private var hideProgress:Boolean
-) : PagedListAdapter<MediaLibraryItem, VideoListAdapter.ViewHolder>(VideoItemDiffCallback()), FastScroller.SeparatedAdapter,
+class VideoListAdapter(
+    private var isSeenMediaMarkerVisible: Boolean,
+    private var hideProgress: Boolean
+) : PagedListAdapter<MediaLibraryItem, VideoListAdapter.ViewHolder>(
+    VideoItemDiffCallback()
+), FastScroller.SeparatedAdapter,
         MultiSelectAdapter<MediaLibraryItem>, IEventsSource<VideoAction> by EventsSource() {
 
     var isListMode = false
@@ -204,6 +202,77 @@ class VideoListAdapter(private var isSeenMediaMarkerVisible: Boolean, private va
         holder.binding.setVariable(BR.inSelection, multiSelectHelper.inActionMode)
     }
 
+    class VideoItemDiffCallback
+
+        : DiffUtil.ItemCallback<MediaLibraryItem>() {
+        override fun areItemsTheSame(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Boolean {
+            if (oldItem == null || newItem == null) return oldItem === newItem
+
+            if (oldItem is MediaWrapper && newItem is MediaWrapper) {
+                val o = oldItem
+                val n = newItem
+                return o.type == n.type && o.equals(n)
+            }
+
+            return oldItem.itemType == newItem.itemType
+                    && oldItem.equals(newItem)
+        }
+
+        override fun areContentsTheSame(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Boolean {
+            if (oldItem == null || newItem == null) return oldItem!!.equals(newItem)
+
+            if (oldItem is MediaWrapper && newItem is MediaWrapper) {
+                val o = oldItem
+                val n = newItem
+
+                return o.displayTime == n.displayTime && equalsNullable(
+                    o.artworkMrl,
+                    n.artworkMrl
+                )
+                        && o.seen == n.seen && o.isPresent == n.isPresent && o.isFavorite == n.isFavorite
+            }
+
+            if (oldItem is VideoGroup && newItem is VideoGroup) {
+                val o = oldItem
+                val n = newItem
+
+                return equalsNullable(o.title, n.title)
+                        && o.tracksCount == n.tracksCount && o.presentCount == n.presentCount && o.isFavorite == n.isFavorite
+            }
+
+            if (oldItem is Folder && newItem is Folder) {
+                val o = oldItem
+                val n = newItem
+
+                return equalsNullable(o.title, n.title)
+                        && o.tracksCount == n.tracksCount && equalsNullable(o.mMrl, n.mMrl)
+                        && o.isFavorite == n.isFavorite
+            }
+
+            return oldItem.equals(newItem)
+        }
+
+        override fun getChangePayload(oldItem: MediaLibraryItem, newItem: MediaLibraryItem): Any? {
+            if (oldItem == null || newItem == null) return null
+
+            if (oldItem is MediaWrapper && newItem is MediaWrapper) {
+                val o = oldItem
+                val n = newItem
+
+                if (o.displayTime != n.displayTime) return UPDATE_TIME
+            }
+
+            if (oldItem.artworkMrl != null && oldItem.artworkMrl != newItem.artworkMrl) return UPDATE_THUMB
+
+            if (oldItem.isFavorite != newItem.isFavorite) return UPDATE_FAVORITE_STATE
+
+            return null
+        }
+
+        private fun equalsNullable(a: Any?, b: Any?): Boolean {
+            return if (a == null) b == null else (a == b)
+        }
+    }
 
     override fun getItemId(position: Int) = 0L
 
